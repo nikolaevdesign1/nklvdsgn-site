@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import gsap from "gsap";
-import { Corners, Cross, Live, Orbit, Plate, Ruler, SectionMark, Tag, Ticker } from "@/components/about/hud";
+import { Corners, Cross, Live, Orbit, Plate, SectionMark, Tag } from "@/components/about/hud";
 import { StarField } from "@/components/about/star-field";
 import { useDrift, useReducedMotion, useScrollProgress } from "@/components/about/hooks";
 import {
@@ -56,17 +56,11 @@ function Hero() {
   return (
     <section ref={ref} className="relative -mt-14 flex min-h-dvh flex-col overflow-hidden">
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="about-grid absolute inset-0" />
-        <Orbit className="absolute top-[8%] right-[-12%] w-[70vw] max-w-[900px] opacity-60 sm:right-[-4%]" />
+        <Orbit className="absolute top-[8%] right-[-12%] w-[70vw] max-w-[900px] opacity-30 sm:right-[-4%]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_36%,transparent_0%,rgba(10,10,11,0.5)_58%,#0a0a0b_100%)]" />
       </div>
       <StarField />
-      <Ruler label="NKL // 26 // night shift" className="absolute top-40 bottom-40 left-3 z-10 hidden lg:flex" />
-      <Cross className="top-24 right-8 z-10 hidden sm:block" />
-      <Cross className="bottom-24 left-8 z-10 hidden sm:block" />
-      <Pop src={photos.choker} className="top-[34%] left-[3%] w-[24%] [animation-delay:-1s] sm:w-[11%]" />
       <Pop src={photos.red} className="top-[42%] right-[5%] w-[26%] [animation-delay:-5.5s] sm:w-[12%]" />
-      <Pop src={photos.black} className="right-[33%] bottom-[30%] hidden w-[9%] [animation-delay:-8s] sm:block" />
 
       <div className="relative z-10 grid grid-cols-12 items-start gap-x-4 gap-y-6 px-4 pt-28 sm:px-8">
         <Tag tone="scan" className="col-span-12 sm:col-span-4">
@@ -88,7 +82,6 @@ function Hero() {
           <Live>Night mode on</Live>
           <Tag>Sky 01 / Scroll to descend</Tag>
         </div>
-        <Ticker items={["Identity", "Interfaces", "Digital products", "After dark", "Next.js", "WebGL", "Motion"]} />
         <div className="flex max-w-6xl flex-col gap-5">
           <h1 className={cn(display, "about-split text-5xl leading-[0.92] text-foreground sm:text-7xl lg:text-8xl")}>
             <span className="sr-only">{heroLine}</span>
