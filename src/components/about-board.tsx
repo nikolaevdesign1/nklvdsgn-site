@@ -301,12 +301,9 @@ function Services() {
       <SectionMark index="02" label="Services" />
       <div className="grid grid-cols-12 items-end gap-x-4 gap-y-6">
         <h2 className={cn(display, "col-span-12 text-5xl text-foreground sm:col-span-6 sm:text-7xl")}>Services</h2>
-        <p className="col-span-9 max-w-xs font-sans text-sm leading-snug text-quiet sm:col-span-4 sm:col-start-8">
+        <p className="col-span-12 max-w-xs font-sans text-sm leading-snug text-quiet sm:col-span-4 sm:col-start-8">
           Twelve ways to work with the studio. Pick one, or stack a few. Click a card to start a brief.
         </p>
-        <Tag tone="scan" className="col-span-3 text-right sm:col-span-2">
-          {String(services.length).padStart(2, "0")}
-        </Tag>
       </div>
       <div ref={grid} className="mt-10 grid grid-cols-2 gap-2 md:grid-cols-4">
         {services.map((item, index) => (
