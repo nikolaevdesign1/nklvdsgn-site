@@ -125,8 +125,8 @@ export function StarField({ className = "" }: { className?: string }) {
         const y = ((star.y + t * star.depth * 2.4 + pointer.y * star.depth * 18) % height + height) % height;
         ctx.fillStyle = `rgba(${star.tint}, ${alpha})`;
         ctx.fillRect(x - star.size / 2, y - star.size / 2, star.size, star.size);
-        if (star.size > 1.35) {
-          const arm = star.size * 4.5;
+        if (star.size > 1.75) {
+          const arm = star.size * 2.2;
           ctx.fillRect(x - arm, y - 0.4, arm * 2, 0.8);
           ctx.fillRect(x - 0.4, y - arm, 0.8, arm * 2);
         }
