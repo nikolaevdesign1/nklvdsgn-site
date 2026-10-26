@@ -5,7 +5,8 @@ import { createPortal } from "react-dom";
 import gsap from "gsap";
 import { Corners, Live, Plate, Tag } from "@/components/about/hud";
 import { StarField } from "@/components/about/star-field";
-import { useReducedMotion, useScrollProgress } from "@/components/about/hooks";
+import { TypeOnScroll } from "@/components/about/type-on-scroll";
+import { useReducedMotion } from "@/components/about/hooks";
 import {
   awardGroups,
   awardsNote,
@@ -86,10 +87,6 @@ function Hero() {
 }
 
 function Company() {
-  const ref = useRef<HTMLElement>(null);
-  const reduced = useReducedMotion();
-  const progress = useScrollProgress(ref);
-  const words = manifesto.split(" ");
 
   const figures = [
     { value: String(services.length), label: "Services" },
@@ -99,21 +96,13 @@ function Company() {
   ];
 
   return (
-    <section ref={ref} className="relative overflow-hidden px-4 py-32 sm:px-8 sm:py-48">
+    <section className="relative overflow-hidden px-4 py-32 sm:px-8 sm:py-48">
       <div className="relative grid grid-cols-12 gap-x-4 gap-y-16">
         <Tag tone="scan" className="col-span-12 sm:col-span-2">
           Agency
         </Tag>
-        <p className={cn(display, "col-span-12 text-4xl leading-[1.05] sm:col-span-10 sm:text-6xl")}>
-          {words.map((word, index) => {
-            const on = reduced || progress >= index / words.length;
-            return (
-              <span key={`${word}-${index}`} className={on ? "text-foreground" : "text-white/25"}>
-                {word}
-                {index < words.length - 1 ? " " : ""}
-              </span>
-            );
-          })}
+        <p className={cn(display, "col-span-12 text-4xl leading-[1.05] text-foreground sm:col-span-10 sm:text-6xl")}>
+          <TypeOnScroll text={manifesto} start={0.85} end={0.3} />
         </p>
 
         <Plate
@@ -133,7 +122,9 @@ function Company() {
             <Tag tone="scan">
               {String(index + 1).padStart(2, "0")} / {block.label}
             </Tag>
-            <p className="font-sans text-[15px] leading-relaxed text-foreground/90 sm:text-base">{block.text}</p>
+            <p className="font-sans text-[15px] leading-relaxed text-foreground/90 sm:text-base">
+              <TypeOnScroll text={block.text} start={0.95} end={0.6} />
+            </p>
           </div>
         ))}
       </div>
