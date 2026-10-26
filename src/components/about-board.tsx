@@ -1,234 +1,102 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import gsap from "gsap";
+import { Corners, Live, Plate, Tag } from "@/components/about/hud";
+import { StarField } from "@/components/about/star-field";
+import { useDrift, useReducedMotion, useScrollProgress } from "@/components/about/hooks";
+import {
+  awardGroups,
+  awardsNote,
+  faqNote,
+  heroLine,
+  heroNote,
+  manifesto,
+  method,
+  mission,
+  photos,
+  questions,
+  serviceFrames,
+  services,
+} from "@/components/about/content";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { projectFields, projects } from "@/data/projects";
 import { scrollEventName } from "@/components/smooth-scroll";
+import { cn } from "@/lib/utils";
 
-const heroLine = "uixcorp.com is a design studio.";
-const company =
-  "Identity, interfaces, and digital products. A biography has not been written.";
+const cold = "grayscale contrast-125 brightness-75";
+const plateTone = "brightness-[0.5] saturate-[0.8] contrast-110";
+const display = "font-sans tracking-[-0.035em]";
 
-const services = [
-  "Brand identity",
-  "Art direction",
-  "Naming",
-  "Website design",
-  "Interface design",
-  "Mobile apps",
-  "Social media",
-  "Motion",
-  "Strategy",
-  "Copywriting",
-  "Frontend",
-  "Product",
-] as const;
-
-const frames = [
-  "/placeholders/case/still.avif",
-  "/placeholders/case/grid-1.avif",
-  "/placeholders/case/full-1.avif",
-  "/placeholders/case/grid-2.avif",
-  "/placeholders/case/intro-1.avif",
-  "/placeholders/case/full-2.avif",
-] as const;
-
-const awardGroups = [
-  {
-    platform: "Behance",
-    lines: [
-      { title: "Site of the Month", count: 2 },
-      { title: "Honorable Mention", count: 3 },
-    ],
-  },
-  {
-    platform: "Awwwards",
-    lines: [
-      { title: "Site of the Day", count: 4 },
-      { title: "Honorable Mention", count: 2 },
-    ],
-  },
-  {
-    platform: "CSS Design Awards",
-    lines: [
-      { title: "Site of the Day", count: 2 },
-      { title: "Site of the Month", count: 1 },
-      { title: "Honorable Mention", count: 3 },
-    ],
-  },
-] as const;
-
-const questions = [
-  {
-    q: "How do I start?",
-    a: "Open Brief with Friend or the contact page. Consultation is free. We can talk through what you want.",
-  },
-  {
-    q: "What does Friend do?",
-    a: "Friend is the brief in this browser. It can guide you around the site, help you figure out where to start, and price a project or design support from the studio calculator. The figure is approximate and stays in this browser.",
-  },
-  {
-    q: "What does the studio design?",
-    a: "Identity, interfaces, and digital products. The studio list covers brand identity, art direction, websites, interface design, mobile apps, motion, strategy, and frontend.",
-  },
-  {
-    q: "How long does a project take?",
-    a: "There is no fixed schedule on this site. Timing comes out of the brief, and a call is the place to talk it through.",
-  },
-  {
-    q: "How do I reach the studio?",
-    a: "Open Contacts. The brief is on that page, and the studio inbox is info@uixcorp.com.",
-  },
-] as const;
-
-const cold =
-  "grayscale contrast-125 brightness-75 saturate-50 hue-rotate-[190deg]";
-const plateTone = "grayscale contrast-110 brightness-[0.38] saturate-0";
-
-function useReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const apply = () => setReduced(query.matches);
-    apply();
-    query.addEventListener("change", apply);
-    return () => query.removeEventListener("change", apply);
-  }, []);
-  return reduced;
-}
-
-function useDrift(ref: RefObject<HTMLElement | null>) {
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    const plates = [...node.querySelectorAll<HTMLElement>("[data-drift]")];
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-    const measure = () => {
-      const current = ref.current;
-      if (!current) return;
-      const rect = current.getBoundingClientRect();
-      const view = window.innerHeight || 1;
-      const reduced = motion.matches;
-      const travel = reduced ? 0.4 : Math.min(1, Math.max(0, (view - rect.top) / (view + rect.height)));
-      for (const plate of plates) {
-        const strength = Number(plate.dataset.drift || "1");
-        const y = reduced ? 0 : (travel - 0.5) * 128 * strength;
-        const x = reduced ? 0 : (travel - 0.5) * -72 * strength;
-        const scale = 1.08 + (reduced ? 0.04 : travel * 0.22 * Math.min(Math.abs(strength), 1));
-        plate.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
-      }
-    };
-
-    measure();
-    window.addEventListener("scroll", measure, { passive: true });
-    window.addEventListener(scrollEventName, measure);
-    return () => {
-      window.removeEventListener("scroll", measure);
-      window.removeEventListener(scrollEventName, measure);
-    };
-  }, [ref]);
-}
-
-function DotField() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let raf = 0;
-    let width = 0;
-    let height = 0;
-
-    const draw = (now: number) => {
-      const bounds = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      if (bounds.width !== width || bounds.height !== height) {
-        width = bounds.width;
-        height = bounds.height;
-        canvas.width = Math.round(width * dpr);
-        canvas.height = Math.round(height * dpr);
-      }
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, width, height);
-      const t = reduced ? 0 : now / 1000;
-      const pitch = 8;
-      ctx.fillStyle = "#f2f2f3";
-      for (let y = pitch; y < height; y += pitch) {
-        const wave = Math.sin(y * 0.02 + t * 0.8) * 28 + Math.sin(t * 0.35) * 12;
-        for (let x = pitch; x < width; x += pitch) {
-          const dome = Math.hypot((x - width * 0.5) / (width * 0.46), (y - height * 0.72) / (height * 0.42));
-          const ridge = Math.sin(x * 0.02 + y * 0.01 + t * 1.1 + wave * 0.02);
-          const alpha = dome < 1 ? 0.15 + (1 - dome) * 0.55 * (0.45 + ridge * 0.55) : 0.04 + Math.max(0, ridge) * 0.08;
-          if (alpha < 0.08) continue;
-          ctx.globalAlpha = alpha;
-          ctx.fillRect(x, y + wave * (1 - Math.min(dome, 1)) * 0.15, 1.4, 1.4);
-        }
-      }
-      ctx.globalAlpha = 1;
-      if (!reduced) raf = requestAnimationFrame(draw);
-    };
-
-    draw(performance.now());
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  return <canvas ref={canvasRef} aria-hidden className="absolute inset-0 size-full" />;
+function Pop({ src, className }: { src: string; className: string }) {
+  return (
+    <div aria-hidden className={cn("about-pop pointer-events-none absolute aspect-[4/5]", className)}>
+      <img src={src} alt="" className="size-full object-cover brightness-90 contrast-110" />
+      <span className="about-scanlines absolute inset-0" />
+      <Corners className="m-1.5" />
+    </div>
+  );
 }
 
 function Hero() {
+  const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
   const [count, setCount] = useState(0);
+  useDrift(ref);
 
   useEffect(() => {
-    if (reduced) {
-      setCount(heroLine.length);
-      return;
-    }
+    if (reduced) return;
     const id = window.setInterval(() => {
       setCount((value) => (value >= heroLine.length ? value : value + 1));
     }, 42);
     return () => window.clearInterval(id);
   }, [reduced]);
-
-  const pops = [
-    { src: frames[0], className: "top-[16%] left-[7%] w-[28%] sm:w-[18%] [animation-delay:-1s]" },
-    { src: frames[1], className: "top-[22%] right-[8%] w-[34%] sm:w-[16%] [animation-delay:-4.2s]" },
-    { src: frames[2], className: "bottom-[18%] left-[18%] w-[30%] sm:w-[20%] [animation-delay:-7s]" },
-    { src: frames[4], className: "right-[14%] bottom-[12%] w-[26%] sm:w-[14%] [animation-delay:-2.4s]" },
-  ];
+  const shown = reduced ? heroLine.length : count;
 
   return (
-    <section className="relative -mt-14 flex min-h-dvh flex-col justify-end overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at 70% 20%, rgba(184,212,255,0.28), transparent 42%), radial-gradient(ellipse at 20% 80%, rgba(242,242,243,0.08), transparent 46%)",
-        }}
-      />
-      <DotField />
-      {pops.map((pop) => (
+    <section ref={ref} className="relative -mt-14 flex min-h-dvh flex-col overflow-hidden">
+      <div aria-hidden className="pointer-events-none absolute inset-0">
         <img
-          key={pop.src}
-          src={pop.src}
+          data-drift="0.5"
+          src={photos.galaxy}
           alt=""
-          className={`about-pop pointer-events-none absolute aspect-[4/5] object-cover ${cold} ${pop.className}`}
+          className="absolute top-[-6%] right-[-16%] h-[90%] w-[80%] max-w-none object-cover opacity-50 [mask-image:radial-gradient(ellipse_at_center,#000_26%,transparent_70%)]"
         />
-      ))}
-      <div className="relative z-10 flex flex-col gap-6 px-4 pt-28 pb-32 sm:px-8 sm:pb-28">
-        <p className="font-mono text-[11px] text-ice">About</p>
-        <div className="flex max-w-5xl flex-col gap-4">
-          <h1 className="font-sans text-5xl leading-[0.92] text-foreground sm:text-7xl lg:text-8xl">
-            {heroLine.slice(0, count)}
-            <span className="text-ice" aria-hidden>
-              {count < heroLine.length ? "▍" : ""}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_36%,transparent_0%,rgba(10,10,11,0.5)_58%,#0a0a0b_100%)]" />
+      </div>
+      <StarField />
+      <Pop src={photos.choker} className="top-[34%] left-[3%] w-[24%] [animation-delay:-1s] sm:w-[11%]" />
+      <Pop src={photos.red} className="top-[42%] right-[5%] w-[26%] [animation-delay:-5.5s] sm:w-[12%]" />
+      <Pop src={photos.black} className="right-[33%] bottom-[30%] hidden w-[9%] [animation-delay:-8s] sm:block" />
+
+      <div className="relative z-10 grid grid-cols-12 items-start gap-x-4 gap-y-6 px-4 pt-28 sm:px-8">
+        <Tag tone="scan" className="col-span-12 sm:col-span-4">
+          About // 01
+        </Tag>
+        <Plate
+          src={photos.green}
+          caption="Subject 01"
+          code="Night shift"
+          className="col-span-6 aspect-[4/5] sm:col-span-3 sm:col-start-5 lg:col-span-2"
+        />
+        <p className="col-span-12 max-w-sm font-sans text-base leading-snug text-foreground sm:col-span-4 sm:col-start-9 sm:text-lg lg:col-span-3 lg:col-start-10">
+          {heroNote}
+        </p>
+      </div>
+
+      <div className="relative z-10 mt-auto flex flex-col gap-6 px-4 pt-24 pb-32 sm:px-8 sm:pb-28">
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-2">
+          <Live>Night mode on</Live>
+          <Tag>Sky 01 / Scroll to descend</Tag>
+        </div>
+        <div className="flex max-w-6xl flex-col gap-5">
+          <h1 className={cn(display, "about-split text-5xl leading-[0.92] text-foreground sm:text-7xl lg:text-8xl")}>
+            <span className="sr-only">{heroLine}</span>
+            <span aria-hidden>
+              {heroLine.slice(0, shown)}
+              <span className="text-scan">{shown < heroLine.length ? "▍" : ""}</span>
             </span>
           </h1>
           <p className="max-w-xl font-sans text-lg leading-snug text-quiet sm:text-2xl">
@@ -243,39 +111,15 @@ function Hero() {
 function Company() {
   const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
-  const [progress, setProgress] = useState(0);
-  const words = company.split(" ");
+  const progress = useScrollProgress(ref);
+  const words = manifesto.split(" ");
   useDrift(ref);
 
-  useEffect(() => {
-    const measure = () => {
-      const node = ref.current;
-      if (!node) return;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        setProgress(1);
-        return;
-      }
-      const rect = node.getBoundingClientRect();
-      const view = window.innerHeight || 1;
-      const start = view * 0.86;
-      const end = view * 0.28;
-      const next = (start - rect.top) / (start - end);
-      setProgress(Math.min(1, Math.max(0, next)));
-    };
-    measure();
-    window.addEventListener("scroll", measure, { passive: true });
-    window.addEventListener(scrollEventName, measure);
-    return () => {
-      window.removeEventListener("scroll", measure);
-      window.removeEventListener(scrollEventName, measure);
-    };
-  }, []);
-
   const figures = [
-    { value: String(services.length), label: "Services", src: "/placeholders/ponder-ai.avif", drift: "0.5" },
-    { value: String(projects.length), label: "Projects", src: "/placeholders/frequency.avif", drift: "-0.4" },
-    { value: String(projectFields.length), label: "Directions", src: "/placeholders/hungry-tiger.avif", drift: "0.62" },
-    { value: "2026", label: "Studio year", src: "/placeholders/cantor8.avif", drift: "-0.55" },
+    { value: String(services.length), label: "Services", src: photos.stars, drift: "0.5" },
+    { value: String(projects.length), label: "Projects", src: photos.green, drift: "-0.4" },
+    { value: String(projectFields.length), label: "Directions", src: photos.milky, drift: "0.62" },
+    { value: "2026", label: "Studio year", src: photos.lips, drift: "-0.55" },
   ];
 
   return (
@@ -283,42 +127,77 @@ function Company() {
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <img
           data-drift="1"
-          src="/placeholders/monolith.avif"
+          src={photos.milky}
           alt=""
-          className={`absolute top-[-16%] left-[-12%] h-[88%] w-[66%] max-w-none object-cover opacity-80 ${plateTone}`}
+          className={cn(
+            "absolute top-[-16%] left-[-12%] h-[88%] w-[66%] max-w-none object-cover opacity-70 [mask-image:radial-gradient(ellipse_at_center,#000_24%,transparent_70%)]",
+            plateTone,
+          )}
         />
         <img
           data-drift="-0.72"
-          src="/placeholders/goom-gum.avif"
+          src={photos.galaxy}
           alt=""
-          className={`absolute right-[-14%] bottom-[-18%] h-[74%] w-[52%] max-w-none object-cover opacity-70 ${plateTone}`}
+          className={cn(
+            "absolute right-[-14%] bottom-[-18%] h-[74%] w-[52%] max-w-none object-cover opacity-60 [mask-image:radial-gradient(ellipse_at_center,#000_24%,transparent_70%)]",
+            plateTone,
+          )}
         />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(10,10,11,0.82)_0%,rgba(10,10,11,0.62)_48%,rgba(10,10,11,0.4)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(10,10,11,0.84)_0%,rgba(10,10,11,0.64)_48%,rgba(10,10,11,0.42)_100%)]" />
       </div>
-      <p className="relative max-w-6xl font-sans text-4xl leading-[1.05] sm:text-6xl lg:text-7xl">
-        {words.map((word, index) => {
-          const on = reduced || progress >= index / words.length;
-          return (
-            <span key={`${word}-${index}`} className={on ? "text-foreground" : "text-white/25"}>
-              {word}
-              {index < words.length - 1 ? " " : ""}
-            </span>
-          );
-        })}
-      </p>
-      <div className="relative mt-16 grid grid-cols-2 gap-px bg-white/10 sm:grid-cols-4">
+
+      <div className="relative grid grid-cols-12 gap-x-4 gap-y-16">
+        <Tag tone="scan" className="col-span-12 sm:col-span-2">
+          Agency
+        </Tag>
+        <p className={cn(display, "col-span-12 text-4xl leading-[1.05] sm:col-span-10 sm:text-6xl")}>
+          {words.map((word, index) => {
+            const on = reduced || progress >= index / words.length;
+            return (
+              <span key={`${word}-${index}`} className={on ? "text-foreground" : "text-white/25"}>
+                {word}
+                {index < words.length - 1 ? " " : ""}
+              </span>
+            );
+          })}
+        </p>
+
+        <Plate
+          src={photos.choker}
+          caption="Subject 02"
+          code="Signal"
+          className="col-span-7 aspect-[3/4] sm:col-span-4 lg:col-span-3 lg:col-start-3"
+        />
+        {[mission, method].map((block, index) => (
+          <div
+            key={block.label}
+            className={cn(
+              "col-span-12 flex flex-col gap-4 sm:col-span-6 lg:col-span-3",
+              index === 0 ? "sm:self-end lg:col-start-6" : "sm:self-end lg:col-start-10",
+            )}
+          >
+            <Tag tone="scan">
+              {String(index + 1).padStart(2, "0")} / {block.label}
+            </Tag>
+            <p className="font-sans text-[15px] leading-relaxed text-foreground/90 sm:text-base">{block.text}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="relative mt-24 grid grid-cols-2 gap-px bg-white/10 sm:grid-cols-4">
         {figures.map((item) => (
           <div key={item.label} className="relative overflow-hidden bg-background px-4 py-8 sm:px-6 sm:py-10">
             <img
               data-drift={item.drift}
               src={item.src}
               alt=""
-              className={`pointer-events-none absolute inset-[-22%] size-[144%] max-w-none object-cover opacity-90 ${plateTone}`}
+              className={cn("pointer-events-none absolute inset-[-22%] size-[144%] max-w-none object-cover opacity-90", plateTone)}
             />
-            <div className="absolute inset-0 bg-[#0a0a0b]/72" />
+            <div className="absolute inset-0 bg-ink/70" />
+            <Corners className="m-2" />
             <div className="relative">
-              <p className="font-sans text-5xl text-foreground sm:text-7xl">{item.value}</p>
-              <p className="mt-3 font-mono text-[11px] text-quiet">{item.label}</p>
+              <p className={cn(display, "text-5xl text-foreground sm:text-7xl")}>{item.value}</p>
+              <Tag className="mt-3">{item.label}</Tag>
             </div>
           </div>
         ))}
@@ -327,11 +206,11 @@ function Company() {
   );
 }
 
-function ServiceCard({ name, index }: { name: string; index: number }) {
+function ServiceCard({ name, note, index }: { name: string; note: string; index: number }) {
   const root = useRef<HTMLElement>(null);
   const photo = useRef<HTMLImageElement>(null);
   const reduced = useReducedMotion();
-  const frame = frames[index % frames.length];
+  const frame = serviceFrames[index % serviceFrames.length];
 
   useEffect(() => {
     const node = root.current;
@@ -362,20 +241,41 @@ function ServiceCard({ name, index }: { name: string; index: number }) {
   }, [reduced]);
 
   return (
-    <article ref={root} data-service-card className="relative min-h-44 overflow-hidden bg-[#121214] sm:min-h-56">
+    <article ref={root} data-service-card className="group relative min-h-52 overflow-hidden bg-module sm:min-h-64">
       <div data-service-wash className="pointer-events-none absolute inset-0 opacity-0">
-        <img src={frame} alt="" className={`size-full object-cover ${cold}`} />
+        <img src={frame} alt="" className={cn("size-full object-cover", cold)} />
       </div>
       <img ref={photo} src={frame} alt="" className="pointer-events-none absolute inset-0 z-[1] size-full object-cover" />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/25 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+      />
+      <span
+        aria-hidden
+        className="about-scanlines pointer-events-none absolute inset-0 z-[2] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+      />
       <button
         type="button"
         onClick={() => {
           window.dispatchEvent(new CustomEvent("uix-open-brief", { detail: { service: name } }));
         }}
-        className="relative z-10 flex h-full min-h-44 w-full cursor-pointer flex-col justify-between p-3 text-left sm:min-h-56 sm:p-4"
+        className="relative z-10 flex h-full min-h-52 w-full cursor-pointer flex-col justify-between gap-6 p-3 text-left sm:min-h-64 sm:p-4"
       >
-        <p className="font-mono text-[11px] text-ice">{String(index + 1).padStart(2, "0")}</p>
-        <h3 className="font-sans text-2xl leading-none text-foreground sm:text-3xl">{name}</h3>
+        <span className="flex items-center justify-between">
+          <Tag tone="scan">{String(index + 1).padStart(2, "0")}</Tag>
+          <span
+            aria-hidden
+            className="font-mono text-sm text-foreground opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100 -translate-x-1"
+          >
+            →
+          </span>
+        </span>
+        <span className="flex flex-col gap-2">
+          <h3 className={cn(display, "about-split text-2xl leading-none text-foreground sm:text-3xl")}>{name}</h3>
+          <span className="max-w-[26ch] font-sans text-[13px] leading-snug text-quiet transition-colors duration-300 group-hover:text-foreground">
+            {note}
+          </span>
+        </span>
       </button>
     </article>
   );
@@ -436,48 +336,10 @@ function Services() {
       if (played) return;
       played = true;
       const tl = gsap.timeline();
-      tl.to(
-        cards,
-        {
-          y: 0,
-          scale: 1,
-          opacity: 1,
-          duration: 0.62,
-          stagger: 0.05,
-          ease: "back.out(1.45)",
-        },
-        0,
-      );
-      tl.to(
-        cards,
-        {
-          clipPath: "inset(0% 0% 0% 0%)",
-          duration: 0.48,
-          stagger: 0.05,
-          ease: "power3.out",
-        },
-        0,
-      );
-      tl.to(
-        washes,
-        {
-          yPercent: 0,
-          duration: 0.44,
-          stagger: 0.05,
-          ease: "power3.out",
-        },
-        0.06,
-      );
-      tl.to(
-        washes,
-        {
-          opacity: 0,
-          duration: 0.22,
-          stagger: 0.05,
-          ease: "power1.out",
-        },
-        0.4,
-      );
+      tl.to(cards, { y: 0, scale: 1, opacity: 1, duration: 0.62, stagger: 0.05, ease: "back.out(1.45)" }, 0);
+      tl.to(cards, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.48, stagger: 0.05, ease: "power3.out" }, 0);
+      tl.to(washes, { yPercent: 0, duration: 0.44, stagger: 0.05, ease: "power3.out" }, 0.06);
+      tl.to(washes, { opacity: 0, duration: 0.22, stagger: 0.05, ease: "power1.out" }, 0.4);
       tl.eventCallback("onComplete", () => {
         gsap.set(cards, { clearProps: "transform,clipPath,opacity" });
       });
@@ -498,13 +360,18 @@ function Services() {
 
   return (
     <section ref={section} className="px-4 py-32 sm:px-8 sm:py-48">
-      <div className="flex items-end justify-between gap-6">
-        <h2 className="font-sans text-5xl text-foreground sm:text-7xl">Services</h2>
-        <p className="font-mono text-[11px] text-quiet">{String(services.length).padStart(2, "0")}</p>
+      <div className="grid grid-cols-12 items-end gap-x-4 gap-y-6">
+        <h2 className={cn(display, "col-span-12 text-5xl text-foreground sm:col-span-6 sm:text-7xl")}>Services</h2>
+        <p className="col-span-9 max-w-xs font-sans text-sm leading-snug text-quiet sm:col-span-4 sm:col-start-8">
+          Twelve ways to work with the studio. Pick one, or stack a few. Click a card to start a brief.
+        </p>
+        <Tag tone="scan" className="col-span-3 text-right sm:col-span-2">
+          {String(services.length).padStart(2, "0")}
+        </Tag>
       </div>
       <div ref={grid} className="mt-10 grid grid-cols-2 gap-2 md:grid-cols-4">
-        {services.map((name, index) => (
-          <ServiceCard key={name} name={name} index={index} />
+        {services.map((item, index) => (
+          <ServiceCard key={item.name} name={item.name} note={item.note} index={index} />
         ))}
       </div>
       {mounted
@@ -549,9 +416,14 @@ function Awards() {
   );
   return (
     <section className="px-4 py-32 sm:px-8 sm:py-48">
-      <div className="flex items-baseline justify-between gap-6">
-        <h2 className="font-sans text-5xl text-foreground sm:text-7xl">Awards</h2>
-        <p className="font-sans text-3xl text-foreground sm:text-5xl">({total})</p>
+      <div className="grid grid-cols-12 items-baseline gap-x-4 gap-y-4">
+        <h2 className={cn(display, "col-span-9 text-5xl text-foreground sm:col-span-6 sm:text-7xl")}>Awards</h2>
+        <p className={cn(display, "col-span-3 text-right text-3xl text-scan sm:col-span-2 sm:col-start-11 sm:text-5xl")}>
+          ({total})
+        </p>
+        <p className="col-span-12 max-w-xs font-sans text-sm leading-snug text-quiet sm:col-span-4 sm:col-start-8 sm:row-start-2">
+          {awardsNote}
+        </p>
       </div>
       <div className="mt-16">
         {awardGroups.map((group) => (
@@ -561,14 +433,14 @@ function Awards() {
               return (
                 <div
                   key={line.title}
-                  className="grid items-baseline gap-4 py-4 sm:grid-cols-12 sm:gap-8 sm:py-5"
+                  className="grid items-baseline gap-4 py-4 transition-colors duration-200 hover:bg-white/[0.035] sm:grid-cols-12 sm:gap-8 sm:py-5"
                 >
                   <p
                     className={`font-sans text-lg text-foreground sm:col-span-4 sm:text-xl ${index === 0 ? "" : "hidden sm:block"}`}
                   >
-                    {index === 0 ? group.platform : "\u00a0"}
+                    {index === 0 ? group.platform : " "}
                   </p>
-                  <p className="font-sans text-lg tabular-nums text-foreground sm:col-span-1">x {line.count}</p>
+                  <p className="font-mono text-base tabular-nums text-scan sm:col-span-1">x {line.count}</p>
                   <p className="font-sans text-lg text-foreground sm:col-span-3">{line.title}</p>
                   {work ? (
                     <p className="text-right font-sans text-lg text-quiet sm:col-span-4">{work}</p>
@@ -592,11 +464,32 @@ function Faq() {
   return (
     <section className="px-4 py-32 sm:px-8 sm:py-48">
       <div className="grid items-start gap-16 lg:grid-cols-12 lg:gap-20">
-        <div className="lg:col-span-4 lg:sticky lg:top-24">
-          <h2 className="font-sans text-5xl text-foreground sm:text-7xl">FAQ</h2>
-          <p className="mt-4 max-w-xs font-sans text-sm leading-snug text-quiet">
-            Identity, interfaces, and digital products.
-          </p>
+        <div className="lg:sticky lg:top-24 lg:col-span-4">
+          <h2 className={cn(display, "text-5xl text-foreground sm:text-7xl")}>FAQ</h2>
+          <p className="mt-4 max-w-xs font-sans text-sm leading-snug text-quiet">{faqNote}</p>
+          <div className="relative mt-10 size-40">
+            <img
+              src={photos.lips}
+              alt=""
+              loading="lazy"
+              className="size-full rounded-full object-cover object-[50%_28%] brightness-90 contrast-110"
+            />
+            <svg aria-hidden viewBox="0 0 100 100" className="about-ring absolute -inset-3 size-[calc(100%+1.5rem)]">
+              <circle
+                cx="50"
+                cy="50"
+                r="48.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.5"
+                strokeDasharray="1.2 3.2"
+                className="text-scan"
+              />
+            </svg>
+            <Tag tone="scan" className="absolute top-1/2 left-[calc(100%+1.25rem)] -translate-y-1/2 whitespace-nowrap">
+              Online
+            </Tag>
+          </div>
         </div>
         <div className="lg:col-span-8">
           {questions.map((item, index) => {
@@ -607,11 +500,18 @@ function Faq() {
                   type="button"
                   aria-expanded={shown}
                   onClick={() => setOpen(shown ? null : index)}
-                  className="flex w-full cursor-pointer items-baseline gap-4 py-7 text-left sm:gap-8 sm:py-9"
+                  className="group flex w-full cursor-pointer items-baseline gap-4 py-7 text-left sm:gap-8 sm:py-9"
                 >
-                  <span className="font-mono text-[11px] text-quiet">{String(index + 1).padStart(2, "0")}</span>
-                  <span className="flex-1 font-sans text-2xl text-foreground sm:text-4xl">{item.q}</span>
-                  <span className="font-sans text-4xl leading-none text-ice">{shown ? "−" : "+"}</span>
+                  <Tag className="transition-colors group-hover:text-scan">{String(index + 1).padStart(2, "0")}</Tag>
+                  <span
+                    className={cn(
+                      display,
+                      "flex-1 text-2xl text-foreground transition-transform duration-300 ease-out group-hover:translate-x-1 sm:text-4xl",
+                    )}
+                  >
+                    {item.q}
+                  </span>
+                  <span className="font-sans text-4xl leading-none text-scan">{shown ? "−" : "+"}</span>
                 </button>
                 <div
                   className={`grid ${reduced ? "" : "transition-[grid-template-rows] duration-300 ease-out"} ${shown ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}

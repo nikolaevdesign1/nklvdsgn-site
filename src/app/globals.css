@@ -11,6 +11,8 @@
   --font-mono: var(--font-fragment);
   --font-heading: var(--font-grotesk);
   --color-ice: #b8d4ff;
+  --color-scan: #5df3ff;
+  --color-signal: #ff3355;
   --color-ink: #0a0a0b;
   --color-module: #121214;
   --color-line: #dcdcde;
@@ -1101,4 +1103,69 @@ summary {
 
 .about-pop {
   animation: about-pop 11s ease-in-out infinite;
+}
+
+/* About: cyberpunk night-sky details */
+.about-scanlines {
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, 0.3) 2px 3px);
+  mix-blend-mode: multiply;
+}
+
+@keyframes about-split {
+  0% {
+    text-shadow: none;
+  }
+  25% {
+    text-shadow:
+      3px 0 var(--color-signal),
+      -3px 0 var(--color-scan);
+    transform: translateX(1px);
+  }
+  55% {
+    text-shadow:
+      -2px 0 var(--color-signal),
+      2px 0 var(--color-scan);
+    transform: translateX(-1px);
+  }
+  100% {
+    text-shadow: none;
+    transform: none;
+  }
+}
+
+.about-split:hover {
+  animation: about-split 0.42s steps(3, end) 1;
+}
+
+@keyframes about-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
+.about-blink {
+  animation: about-blink 1.3s linear infinite;
+}
+
+@keyframes about-ring {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.about-ring {
+  animation: about-ring 48s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-split:hover,
+  .about-blink,
+  .about-ring {
+    animation: none;
+  }
 }

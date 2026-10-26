@@ -3,7 +3,7 @@ import { AboutBoard } from "@/components/about-board";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "uixcorp.com is a design studio.",
+  description: "An independent design studio working between city lights and stars: identity, interfaces, and digital products.",
 };
 
 export default function AboutPage() {
