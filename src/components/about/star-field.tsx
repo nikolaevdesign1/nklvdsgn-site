@@ -41,7 +41,7 @@ const constellations: readonly Constellation[] = [
   },
 ];
 
-const SCAN = "93, 243, 255";
+const SCAN = "184, 212, 255";
 
 function rng(seed: number) {
   let state = seed >>> 0;
@@ -59,7 +59,7 @@ function makeStars(width: number, height: number): Star[] {
   const count = Math.min(720, Math.max(220, Math.round((width * height) / 2400)));
   return Array.from({ length: count }, () => {
     const pick = random();
-    const tint = pick < 0.08 ? "184, 212, 255" : pick < 0.12 ? SCAN : pick < 0.14 ? "255, 51, 85" : "242, 242, 243";
+    const tint = pick < 0.12 ? SCAN : pick < 0.14 ? "255, 51, 85" : "242, 242, 243";
     return {
       x: random() * width,
       y: random() * height,

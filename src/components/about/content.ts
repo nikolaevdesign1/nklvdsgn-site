@@ -22,22 +22,7 @@ export const photos = {
   lips: "/about/person-lips.jpg",
   red: "/about/person-red.jpg",
   black: "/about/person-black.jpg",
-  galaxy: "/about/sky-galaxy.jpg",
-  milky: "/about/sky-milky.jpg",
-  stars: "/about/sky-stars.jpg",
 } as const;
-
-// Service cards cycle through these on hover: people and sky, alternating.
-export const serviceFrames = [
-  photos.green,
-  photos.galaxy,
-  photos.choker,
-  photos.milky,
-  photos.lips,
-  photos.stars,
-  photos.red,
-  photos.black,
-] as const;
 
 export const services = [
   { name: "Brand identity", note: "Marks, type, color, and the rules that hold them together." },

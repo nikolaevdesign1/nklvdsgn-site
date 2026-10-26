@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import gsap from "gsap";
-import { Corners, Live, Plate, Tag } from "@/components/about/hud";
+import { Corners, Cross, Live, Orbit, Plate, Ruler, SectionMark, Tag, Ticker } from "@/components/about/hud";
 import { StarField } from "@/components/about/star-field";
 import { useDrift, useReducedMotion, useScrollProgress } from "@/components/about/hooks";
 import {
@@ -17,7 +17,6 @@ import {
   mission,
   photos,
   questions,
-  serviceFrames,
   services,
 } from "@/components/about/content";
 import { SiteFooter } from "@/components/site-footer";
@@ -26,7 +25,6 @@ import { projectFields, projects } from "@/data/projects";
 import { scrollEventName } from "@/components/smooth-scroll";
 import { cn } from "@/lib/utils";
 
-const cold = "grayscale contrast-125 brightness-75";
 const plateTone = "brightness-[0.5] saturate-[0.8] contrast-110";
 const display = "font-sans tracking-[-0.035em]";
 
@@ -58,15 +56,14 @@ function Hero() {
   return (
     <section ref={ref} className="relative -mt-14 flex min-h-dvh flex-col overflow-hidden">
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <img
-          data-drift="0.5"
-          src={photos.galaxy}
-          alt=""
-          className="absolute top-[-6%] right-[-16%] h-[90%] w-[80%] max-w-none object-cover opacity-50 [mask-image:radial-gradient(ellipse_at_center,#000_26%,transparent_70%)]"
-        />
+        <div className="about-grid absolute inset-0" />
+        <Orbit className="absolute top-[8%] right-[-12%] w-[70vw] max-w-[900px] opacity-60 sm:right-[-4%]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_36%,transparent_0%,rgba(10,10,11,0.5)_58%,#0a0a0b_100%)]" />
       </div>
       <StarField />
+      <Ruler label="NKL // 26 // night shift" className="absolute top-40 bottom-40 left-3 z-10 hidden lg:flex" />
+      <Cross className="top-24 right-8 z-10 hidden sm:block" />
+      <Cross className="bottom-24 left-8 z-10 hidden sm:block" />
       <Pop src={photos.choker} className="top-[34%] left-[3%] w-[24%] [animation-delay:-1s] sm:w-[11%]" />
       <Pop src={photos.red} className="top-[42%] right-[5%] w-[26%] [animation-delay:-5.5s] sm:w-[12%]" />
       <Pop src={photos.black} className="right-[33%] bottom-[30%] hidden w-[9%] [animation-delay:-8s] sm:block" />
@@ -91,6 +88,7 @@ function Hero() {
           <Live>Night mode on</Live>
           <Tag>Sky 01 / Scroll to descend</Tag>
         </div>
+        <Ticker items={["Identity", "Interfaces", "Digital products", "After dark", "Next.js", "WebGL", "Motion"]} />
         <div className="flex max-w-6xl flex-col gap-5">
           <h1 className={cn(display, "about-split text-5xl leading-[0.92] text-foreground sm:text-7xl lg:text-8xl")}>
             <span className="sr-only">{heroLine}</span>
@@ -116,37 +114,26 @@ function Company() {
   useDrift(ref);
 
   const figures = [
-    { value: String(services.length), label: "Services", src: photos.stars, drift: "0.5" },
+    { value: String(services.length), label: "Services", src: photos.red, drift: "0.5" },
     { value: String(projects.length), label: "Projects", src: photos.green, drift: "-0.4" },
-    { value: String(projectFields.length), label: "Directions", src: photos.milky, drift: "0.62" },
+    { value: String(projectFields.length), label: "Directions", src: photos.black, drift: "0.62" },
     { value: "2026", label: "Studio year", src: photos.lips, drift: "-0.55" },
   ];
 
   return (
     <section ref={ref} className="relative overflow-hidden px-4 py-32 sm:px-8 sm:py-48">
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <img
-          data-drift="1"
-          src={photos.milky}
-          alt=""
-          className={cn(
-            "absolute top-[-16%] left-[-12%] h-[88%] w-[66%] max-w-none object-cover opacity-70 [mask-image:radial-gradient(ellipse_at_center,#000_24%,transparent_70%)]",
-            plateTone,
-          )}
-        />
-        <img
-          data-drift="-0.72"
-          src={photos.galaxy}
-          alt=""
-          className={cn(
-            "absolute right-[-14%] bottom-[-18%] h-[74%] w-[52%] max-w-none object-cover opacity-60 [mask-image:radial-gradient(ellipse_at_center,#000_24%,transparent_70%)]",
-            plateTone,
-          )}
-        />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(10,10,11,0.84)_0%,rgba(10,10,11,0.64)_48%,rgba(10,10,11,0.42)_100%)]" />
+        <div className="about-grid absolute inset-0" />
+        <Orbit className="absolute top-[4%] left-[-18%] w-[60vw] max-w-[760px] opacity-40" />
+        <Orbit className="absolute right-[-16%] bottom-[6%] w-[44vw] max-w-[560px] opacity-30" />
       </div>
+      <Cross className="top-10 left-8 hidden sm:block" />
+      <Cross className="top-10 right-8 hidden sm:block" />
 
       <div className="relative grid grid-cols-12 gap-x-4 gap-y-16">
+        <div className="col-span-12 -mb-8">
+          <SectionMark index="01" label="Agency" />
+        </div>
         <Tag tone="scan" className="col-span-12 sm:col-span-2">
           Agency
         </Tag>
@@ -207,53 +194,16 @@ function Company() {
 }
 
 function ServiceCard({ name, note, index }: { name: string; note: string; index: number }) {
-  const root = useRef<HTMLElement>(null);
-  const photo = useRef<HTMLImageElement>(null);
-  const reduced = useReducedMotion();
-  const frame = serviceFrames[index % serviceFrames.length];
-
-  useEffect(() => {
-    const node = root.current;
-    const image = photo.current;
-    if (!node || !image) return;
-    gsap.set(image, { opacity: 0, yPercent: 10, scale: 0.97 });
-    const show = () => {
-      if (reduced) {
-        gsap.set(image, { opacity: 1, yPercent: 0, scale: 1 });
-        return;
-      }
-      gsap.to(image, { opacity: 1, yPercent: 0, scale: 1.03, duration: 0.42, ease: "power3.out" });
-    };
-    const hide = () => {
-      if (reduced) {
-        gsap.set(image, { opacity: 0, yPercent: 0, scale: 1 });
-        return;
-      }
-      gsap.to(image, { opacity: 0, yPercent: 8, scale: 0.98, duration: 0.32, ease: "power2.out" });
-    };
-    node.addEventListener("pointerenter", show);
-    node.addEventListener("pointerleave", hide);
-    return () => {
-      node.removeEventListener("pointerenter", show);
-      node.removeEventListener("pointerleave", hide);
-      gsap.killTweensOf(image);
-    };
-  }, [reduced]);
-
   return (
-    <article ref={root} data-service-card className="group relative min-h-52 overflow-hidden bg-module sm:min-h-64">
-      <div data-service-wash className="pointer-events-none absolute inset-0 opacity-0">
-        <img src={frame} alt="" className={cn("size-full object-cover", cold)} />
-      </div>
-      <img ref={photo} src={frame} alt="" className="pointer-events-none absolute inset-0 z-[1] size-full object-cover" />
+    <article
+      data-service-card
+      className="about-card group relative min-h-52 overflow-hidden bg-module transition-colors duration-300 hover:bg-[#17181c] sm:min-h-64"
+    >
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/25 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        className="about-sweep pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-transparent via-scan/10 to-transparent"
       />
-      <span
-        aria-hidden
-        className="about-scanlines pointer-events-none absolute inset-0 z-[2] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-      />
+      <Corners className="m-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <button
         type="button"
         onClick={() => {
@@ -265,7 +215,7 @@ function ServiceCard({ name, note, index }: { name: string; note: string; index:
           <Tag tone="scan">{String(index + 1).padStart(2, "0")}</Tag>
           <span
             aria-hidden
-            className="font-mono text-sm text-foreground opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100 -translate-x-1"
+            className="-translate-x-1 font-mono text-sm text-scan opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100"
           >
             →
           </span>
@@ -320,16 +270,13 @@ function Services() {
     const node = grid.current;
     if (!node) return;
     const cards = gsap.utils.toArray<HTMLElement>("[data-service-card]", node);
-    const washes = gsap.utils.toArray<HTMLElement>("[data-service-wash]", node);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) {
-      gsap.set(washes, { opacity: 0 });
       gsap.set(cards, { clearProps: "transform,opacity,clipPath" });
       return;
     }
 
     gsap.set(cards, { y: 52, scale: 0.92, opacity: 0, clipPath: "inset(34% 6% 34% 6%)" });
-    gsap.set(washes, { yPercent: 110, opacity: 1 });
 
     let played = false;
     const play = () => {
@@ -338,8 +285,6 @@ function Services() {
       const tl = gsap.timeline();
       tl.to(cards, { y: 0, scale: 1, opacity: 1, duration: 0.62, stagger: 0.05, ease: "back.out(1.45)" }, 0);
       tl.to(cards, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.48, stagger: 0.05, ease: "power3.out" }, 0);
-      tl.to(washes, { yPercent: 0, duration: 0.44, stagger: 0.05, ease: "power3.out" }, 0.06);
-      tl.to(washes, { opacity: 0, duration: 0.22, stagger: 0.05, ease: "power1.out" }, 0.4);
       tl.eventCallback("onComplete", () => {
         gsap.set(cards, { clearProps: "transform,clipPath,opacity" });
       });
@@ -354,12 +299,13 @@ function Services() {
     observer.observe(node);
     return () => {
       observer.disconnect();
-      gsap.killTweensOf([...cards, ...washes]);
+      gsap.killTweensOf(cards);
     };
   }, []);
 
   return (
     <section ref={section} className="px-4 py-32 sm:px-8 sm:py-48">
+      <SectionMark index="02" label="Services" />
       <div className="grid grid-cols-12 items-end gap-x-4 gap-y-6">
         <h2 className={cn(display, "col-span-12 text-5xl text-foreground sm:col-span-6 sm:text-7xl")}>Services</h2>
         <p className="col-span-9 max-w-xs font-sans text-sm leading-snug text-quiet sm:col-span-4 sm:col-start-8">
@@ -416,6 +362,7 @@ function Awards() {
   );
   return (
     <section className="px-4 py-32 sm:px-8 sm:py-48">
+      <SectionMark index="03" label="Awards" />
       <div className="grid grid-cols-12 items-baseline gap-x-4 gap-y-4">
         <h2 className={cn(display, "col-span-9 text-5xl text-foreground sm:col-span-6 sm:text-7xl")}>Awards</h2>
         <p className={cn(display, "col-span-3 text-right text-3xl text-scan sm:col-span-2 sm:col-start-11 sm:text-5xl")}>
@@ -463,6 +410,7 @@ function Faq() {
 
   return (
     <section className="px-4 py-32 sm:px-8 sm:py-48">
+      <SectionMark index="04" label="FAQ" />
       <div className="grid items-start gap-16 lg:grid-cols-12 lg:gap-20">
         <div className="lg:sticky lg:top-24 lg:col-span-4">
           <h2 className={cn(display, "text-5xl text-foreground sm:text-7xl")}>FAQ</h2>
