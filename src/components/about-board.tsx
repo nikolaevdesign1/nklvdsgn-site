@@ -192,17 +192,14 @@ function ServiceCard({ name, note, index }: { name: string; note: string; index:
       data-service-card
       className="about-card group relative min-h-52 overflow-hidden bg-module transition-colors duration-300 hover:bg-[#17181c] sm:min-h-64"
     >
-      <span
-        aria-hidden
-        className="about-sweep pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-transparent via-scan/10 to-transparent"
-      />
+      <span aria-hidden className="about-noise pointer-events-none absolute inset-0 z-[5]" />
       <Corners className="m-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <button
         type="button"
         onClick={() => {
           window.dispatchEvent(new CustomEvent("uix-open-brief", { detail: { service: name } }));
         }}
-        className="relative z-10 flex h-full min-h-52 w-full cursor-pointer flex-col justify-between gap-6 p-3 text-left sm:min-h-64 sm:p-4"
+        className="about-jitter relative z-10 flex h-full min-h-52 w-full cursor-pointer flex-col justify-between gap-6 p-3 text-left sm:min-h-64 sm:p-4"
       >
         <span className="flex items-center justify-between">
           <Tag tone="scan">{String(index + 1).padStart(2, "0")}</Tag>
@@ -214,7 +211,7 @@ function ServiceCard({ name, note, index }: { name: string; note: string; index:
           </span>
         </span>
         <span className="flex flex-col gap-2">
-          <h3 className={cn(display, "about-split text-2xl leading-none text-foreground sm:text-3xl")}>{name}</h3>
+          <h3 className={cn(display, "about-split-live text-2xl leading-none text-foreground sm:text-3xl")}>{name}</h3>
           <span className="max-w-[26ch] font-sans text-[13px] leading-snug text-quiet transition-colors duration-300 group-hover:text-foreground">
             {note}
           </span>
@@ -400,7 +397,6 @@ function Faq() {
 
   return (
     <section className="px-4 py-32 sm:px-8 sm:py-48">
-      <SectionMark index="04" label="FAQ" />
       <div className="grid items-start gap-16 lg:grid-cols-12 lg:gap-20">
         <div className="lg:sticky lg:top-24 lg:col-span-4">
           <h2 className={cn(display, "text-5xl text-foreground sm:text-7xl")}>FAQ</h2>

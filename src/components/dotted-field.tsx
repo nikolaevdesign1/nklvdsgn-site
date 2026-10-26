@@ -96,6 +96,8 @@ function takeCloud(geometry: THREE.BufferGeometry, figures: boolean) {
 }
 // The glb matches the HTML viewer cloud with Y one unit higher.
 const PEOPLE_Y_SHIFT = -1;
+// Centre of the two figures along X in the glb.
+const FIGURE_CENTER_X = 0.3;
 
 function mount(element: HTMLDivElement, renderer: THREE.WebGLRenderer, root: THREE.Object3D) {
   const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -142,6 +144,11 @@ function mount(element: HTMLDivElement, renderer: THREE.WebGLRenderer, root: THR
     camera.position.set(0, 0.15, portrait ? 5.2 : 3.4);
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
+    // Only the hills stretch to the screen edges. The people keep their proportions,
+    // and the floor shifts so the same patch of hill stays under their feet.
+    const stretch = portrait ? 1.5 : Math.min(2.4, 1.2 + camera.aspect * 0.4);
+    floor.scale.x = stretch;
+    floor.position.x = -(stretch - 1) * FIGURE_CENTER_X;
     const sway = reduced ? 0 : Math.sin(time * 0.25) * 0.35;
     group.rotation.set(0.06, sway, 0);
   };

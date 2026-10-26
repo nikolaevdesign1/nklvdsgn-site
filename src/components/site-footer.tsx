@@ -55,7 +55,7 @@ function TypedMail() {
       <span className="invisible" aria-hidden>
         {STUDIO_MAIL}
       </span>
-      <span className="absolute top-0 left-0" aria-hidden>
+      <span className="absolute top-0 left-4 sm:left-8" aria-hidden>
         {shown}
       </span>
     </a>

@@ -1210,23 +1210,53 @@ summary {
   animation: about-ticker 60s linear infinite;
 }
 
-@keyframes about-sweep {
-  from {
-    transform: translateY(-100%);
-  }
-  to {
-    transform: translateY(100%);
-  }
+.about-noise {
+  opacity: 0;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / 35%) 2px 3px),
+    linear-gradient(to bottom, transparent 0 18%, rgb(184 212 255 / 16%) 18% 23%, transparent 23% 61%, rgb(242 242 243 / 10%) 61% 63%, transparent 63% 100%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+  background-size: 100% 100%, 100% 100%, 160px 160px;
+  mix-blend-mode: screen;
+  transition: opacity 0.12s steps(2, end);
 }
 
-.about-card:hover .about-sweep {
-  animation: about-sweep 0.9s ease-out 1;
+@keyframes about-noise {
+  0% { background-position: 0 0, 0 0, 0 0; transform: translateX(0); opacity: 0.22; }
+  16% { background-position: 0 0, 0 14%, 40px 90px; transform: translateX(-2px); opacity: 0.4; }
+  33% { background-position: 0 0, 0 -22%, -70px 20px; transform: translateX(2px); opacity: 0.14; }
+  50% { background-position: 0 0, 0 31%, 20px -60px; transform: translateX(0); opacity: 0.34; }
+  66% { background-position: 0 0, 0 -9%, -30px 110px; transform: translateX(3px); opacity: 0.18; }
+  83% { background-position: 0 0, 0 40%, 90px -20px; transform: translateX(-3px); opacity: 0.38; }
+  100% { background-position: 0 0, 0 0, 0 0; transform: translateX(0); opacity: 0.22; }
+}
+
+@keyframes about-jitter {
+  0%, 100% { transform: none; clip-path: none; }
+  20% { transform: translateX(-2px); clip-path: inset(12% 0 64% 0); }
+  21% { transform: translateX(3px); clip-path: none; }
+  58% { transform: translateX(2px); clip-path: inset(70% 0 8% 0); }
+  59% { transform: none; clip-path: none; }
+}
+
+.about-card:hover .about-noise {
+  animation: about-noise 0.55s steps(1, end) infinite;
+}
+
+.about-card:hover .about-jitter {
+  animation: about-jitter 0.7s steps(1, end) infinite;
+}
+
+.about-card:hover .about-split-live {
+  animation: about-split 0.5s steps(3, end) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .about-orbit,
   .about-ticker,
-  .about-card:hover .about-sweep {
+  .about-card:hover .about-noise,
+  .about-card:hover .about-jitter,
+  .about-card:hover .about-split-live {
     animation: none;
   }
 }

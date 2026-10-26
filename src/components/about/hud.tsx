@@ -140,7 +140,7 @@ export function SectionMark({ index, label }: { index: string; label: string }) 
   return (
     <div aria-hidden className="mb-10 flex items-center gap-4">
       <Tag tone="scan">[{index}]</Tag>
-      <span className="about-ticks-h h-2 flex-1" />
+      <span className="h-px flex-1 bg-white/15" />
       <Tag>{label}</Tag>
     </div>
   );
