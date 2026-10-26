@@ -3,9 +3,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import gsap from "gsap";
-import { Corners, Cross, Live, Orbit, Plate, SectionMark, Tag } from "@/components/about/hud";
+import { Corners, Live, Plate, Tag } from "@/components/about/hud";
 import { StarField } from "@/components/about/star-field";
-import { useDrift, useReducedMotion, useScrollProgress } from "@/components/about/hooks";
+import { useReducedMotion, useScrollProgress } from "@/components/about/hooks";
 import {
   awardGroups,
   awardsNote,
@@ -25,24 +25,11 @@ import { projectFields, projects } from "@/data/projects";
 import { scrollEventName } from "@/components/smooth-scroll";
 import { cn } from "@/lib/utils";
 
-const plateTone = "brightness-[0.5] saturate-[0.8] contrast-110";
 const display = "font-sans tracking-[-0.035em]";
 
-function Pop({ src, className }: { src: string; className: string }) {
-  return (
-    <div aria-hidden className={cn("about-pop pointer-events-none absolute aspect-[4/5]", className)}>
-      <img src={src} alt="" className="size-full object-cover brightness-90 contrast-110" />
-      <span className="about-scanlines absolute inset-0" />
-      <Corners className="m-1.5" />
-    </div>
-  );
-}
-
 function Hero() {
-  const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
   const [count, setCount] = useState(0);
-  useDrift(ref);
 
   useEffect(() => {
     if (reduced) return;
@@ -54,13 +41,12 @@ function Hero() {
   const shown = reduced ? heroLine.length : count;
 
   return (
-    <section ref={ref} className="relative -mt-14 flex min-h-dvh flex-col overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <Orbit className="absolute top-[8%] right-[-12%] w-[70vw] max-w-[900px] opacity-30 sm:right-[-4%]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_36%,transparent_0%,rgba(10,10,11,0.5)_58%,#0a0a0b_100%)]" />
-      </div>
+    <section className="relative -mt-14 flex min-h-dvh flex-col overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_36%,transparent_0%,rgba(10,10,11,0.5)_58%,#0a0a0b_100%)]"
+      />
       <StarField />
-      <Pop src={photos.red} className="top-[42%] right-[5%] w-[26%] [animation-delay:-5.5s] sm:w-[12%]" />
 
       <div className="relative z-10 grid grid-cols-12 items-start gap-x-4 gap-y-6 px-4 pt-28 sm:px-8">
         <Tag tone="scan" className="col-span-12 sm:col-span-4">
@@ -104,29 +90,17 @@ function Company() {
   const reduced = useReducedMotion();
   const progress = useScrollProgress(ref);
   const words = manifesto.split(" ");
-  useDrift(ref);
 
   const figures = [
-    { value: String(services.length), label: "Services", src: photos.red, drift: "0.5" },
-    { value: String(projects.length), label: "Projects", src: photos.green, drift: "-0.4" },
-    { value: String(projectFields.length), label: "Directions", src: photos.black, drift: "0.62" },
-    { value: "2026", label: "Studio year", src: photos.lips, drift: "-0.55" },
+    { value: String(services.length), label: "Services" },
+    { value: String(projects.length), label: "Projects" },
+    { value: String(projectFields.length), label: "Directions" },
+    { value: "2026", label: "Studio year" },
   ];
 
   return (
     <section ref={ref} className="relative overflow-hidden px-4 py-32 sm:px-8 sm:py-48">
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="about-grid absolute inset-0" />
-        <Orbit className="absolute top-[4%] left-[-18%] w-[60vw] max-w-[760px] opacity-40" />
-        <Orbit className="absolute right-[-16%] bottom-[6%] w-[44vw] max-w-[560px] opacity-30" />
-      </div>
-      <Cross className="top-10 left-8 hidden sm:block" />
-      <Cross className="top-10 right-8 hidden sm:block" />
-
       <div className="relative grid grid-cols-12 gap-x-4 gap-y-16">
-        <div className="col-span-12 -mb-8">
-          <SectionMark index="01" label="Agency" />
-        </div>
         <Tag tone="scan" className="col-span-12 sm:col-span-2">
           Agency
         </Tag>
@@ -166,16 +140,8 @@ function Company() {
 
       <div className="relative mt-24 grid grid-cols-2 gap-px bg-white/10 sm:grid-cols-4">
         {figures.map((item) => (
-          <div key={item.label} className="relative overflow-hidden bg-background px-4 py-8 sm:px-6 sm:py-10">
-            <img
-              data-drift={item.drift}
-              src={item.src}
-              alt=""
-              className={cn("pointer-events-none absolute inset-[-22%] size-[144%] max-w-none object-cover opacity-90", plateTone)}
-            />
-            <div className="absolute inset-0 bg-ink/70" />
-            <Corners className="m-2" />
-            <div className="relative">
+          <div key={item.label} className="bg-background px-4 py-8 sm:px-6 sm:py-10">
+            <div>
               <p className={cn(display, "text-5xl text-foreground sm:text-7xl")}>{item.value}</p>
               <Tag className="mt-3">{item.label}</Tag>
             </div>
@@ -295,7 +261,6 @@ function Services() {
 
   return (
     <section ref={section} className="px-4 py-32 sm:px-8 sm:py-48">
-      <SectionMark index="02" label="Services" />
       <div className="grid grid-cols-12 items-end gap-x-4 gap-y-6">
         <h2 className={cn(display, "col-span-12 text-5xl text-foreground sm:col-span-6 sm:text-7xl")}>Services</h2>
         <p className="col-span-12 max-w-xs font-sans text-sm leading-snug text-quiet sm:col-span-4 sm:col-start-8">
@@ -349,7 +314,6 @@ function Awards() {
   );
   return (
     <section className="px-4 py-32 sm:px-8 sm:py-48">
-      <SectionMark index="03" label="Awards" />
       <div className="grid grid-cols-12 items-baseline gap-x-4 gap-y-4">
         <h2 className={cn(display, "col-span-9 text-5xl text-foreground sm:col-span-6 sm:text-7xl")}>Awards</h2>
         <p className={cn(display, "col-span-3 text-right text-3xl text-scan sm:col-span-2 sm:col-start-11 sm:text-5xl")}>
@@ -401,29 +365,6 @@ function Faq() {
         <div className="lg:sticky lg:top-24 lg:col-span-4">
           <h2 className={cn(display, "text-5xl text-foreground sm:text-7xl")}>FAQ</h2>
           <p className="mt-4 max-w-xs font-sans text-sm leading-snug text-quiet">{faqNote}</p>
-          <div className="relative mt-10 size-40">
-            <img
-              src={photos.lips}
-              alt=""
-              loading="lazy"
-              className="size-full rounded-full object-cover object-[50%_28%] brightness-90 contrast-110"
-            />
-            <svg aria-hidden viewBox="0 0 100 100" className="about-ring absolute -inset-3 size-[calc(100%+1.5rem)]">
-              <circle
-                cx="50"
-                cy="50"
-                r="48.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="0.5"
-                strokeDasharray="1.2 3.2"
-                className="text-scan"
-              />
-            </svg>
-            <Tag tone="scan" className="absolute top-1/2 left-[calc(100%+1.25rem)] -translate-y-1/2 whitespace-nowrap">
-              Online
-            </Tag>
-          </div>
         </div>
         <div className="lg:col-span-8">
           {questions.map((item, index) => {

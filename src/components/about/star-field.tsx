@@ -12,23 +12,6 @@ type Star = {
   tint: string;
 };
 
-type Constellation = {
-  label: string;
-  depth: number;
-  points: readonly (readonly [number, number])[];
-  links: readonly (readonly [number, number])[];
-};
-
-// Unit coordinates. They sit away from the headline (bottom left) and the portrait (top middle).
-const constellations: readonly Constellation[] = [
-  {
-    label: "NKL-26",
-    depth: 0.55,
-    points: [[0.54, 0.2], [0.58, 0.12], [0.64, 0.17], [0.62, 0.27], [0.56, 0.31]],
-    links: [[0, 1], [1, 2], [2, 3], [1, 4]],
-  },
-];
-
 const SCAN = "184, 212, 255";
 
 function rng(seed: number) {
@@ -69,7 +52,6 @@ export function StarField({ className = "" }: { className?: string }) {
     if (!canvas || !ctx) return;
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const mono = getComputedStyle(document.documentElement).getPropertyValue("--font-fragment").trim() || "monospace";
     const random = rng(7);
 
     let width = 0;
@@ -125,43 +107,6 @@ export function StarField({ className = "" }: { className?: string }) {
       ctx.stroke();
     };
 
-    const drawConstellations = (t: number) => {
-      const showLabels = width >= 640;
-      ctx.font = `10px ${mono}`;
-      ctx.textBaseline = "alphabetic";
-      for (const group of constellations) {
-        const ox = pointer.x * group.depth * 20;
-        const oy = pointer.y * group.depth * 20;
-        const at = (index: number) => {
-          const point = group.points[index];
-          return [point[0] * width + ox, point[1] * height + oy] as const;
-        };
-        ctx.strokeStyle = `rgba(${SCAN}, 0.26)`;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        for (const [a, b] of group.links) {
-          const [ax, ay] = at(a);
-          const [bx, by] = at(b);
-          ctx.moveTo(ax, ay);
-          ctx.lineTo(bx, by);
-        }
-        ctx.stroke();
-        group.points.forEach((_, index) => {
-          const [x, y] = at(index);
-          const pulse = 0.65 + 0.35 * Math.sin(t * 1.3 + index * 1.7);
-          ctx.fillStyle = `rgba(${SCAN}, ${0.85 * pulse})`;
-          ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
-          ctx.strokeStyle = `rgba(${SCAN}, 0.35)`;
-          ctx.strokeRect(x - 5.5, y - 5.5, 11, 11);
-        });
-        if (showLabels) {
-          const [lx, ly] = at(0);
-          ctx.fillStyle = `rgba(${SCAN}, 0.6)`;
-          ctx.fillText(group.label, lx + 12, ly - 10);
-        }
-      }
-    };
-
     const draw = (now: number) => {
       const t = motion.matches ? 0 : now / 1000;
       const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
@@ -186,7 +131,6 @@ export function StarField({ className = "" }: { className?: string }) {
           ctx.fillRect(x - 0.4, y - arm, 0.8, arm * 2);
         }
       }
-      drawConstellations(t);
       if (!motion.matches) drawShot(dt, t);
     };
 

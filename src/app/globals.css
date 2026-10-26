@@ -1170,46 +1170,6 @@ summary {
   }
 }
 
-.about-ticks {
-  background: repeating-linear-gradient(to bottom, currentColor 0 1px, transparent 1px 8px);
-  color: rgb(242 242 243 / 28%);
-  mask-image: linear-gradient(to right, #000 0 100%);
-}
-
-.about-ticks-h {
-  background:
-    repeating-linear-gradient(to right, rgb(242 242 243 / 30%) 0 1px, transparent 1px 8px) bottom / 100% 5px no-repeat,
-    linear-gradient(rgb(242 242 243 / 18%), rgb(242 242 243 / 18%)) bottom / 100% 1px no-repeat;
-}
-
-.about-grid {
-  background-image:
-    linear-gradient(rgb(242 242 243 / 4%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(242 242 243 / 4%) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
-}
-
-@keyframes about-orbit {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.about-orbit {
-  animation: about-orbit 40s linear infinite;
-}
-
-@keyframes about-ticker {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.about-ticker {
-  animation: about-ticker 60s linear infinite;
-}
-
 .about-noise {
   opacity: 0;
   background:
@@ -1252,8 +1212,6 @@ summary {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .about-orbit,
-  .about-ticker,
   .about-card:hover .about-noise,
   .about-card:hover .about-jitter,
   .about-card:hover .about-split-live {
